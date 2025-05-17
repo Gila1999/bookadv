@@ -8,7 +8,7 @@
 
     <div class="container">
         <h1 class="text-center my-4">Formulario de Contacto</h1>
-        <form th:action="@{/enviarContacto}" method="post" th:object="${formInfo}">
+        <form th:action="@{/public/enviarContacto}" method="post" th:object="${formInfo}">
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
                 <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required/>

@@ -1,13 +1,14 @@
 package com.example.bookadv.controllers;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,8 @@ import com.example.bookadv.domain.Valoracion;
 import com.example.bookadv.services.LibroService;
 import com.example.bookadv.services.UsuarioService;
 import com.example.bookadv.services.ValoracionService;
-import com.example.bookadv.domain.Role;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/valoraciones")
@@ -36,121 +38,152 @@ public class ValoracionController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Listar todas las valoraciones (solo ADMIN o MANAGER)
+    // ---------------------------------------------------
+    // 1) Listar todas las valoraciones (ADMIN/MANAGER)
+    // ---------------------------------------------------
     @GetMapping
     public String listarValoraciones(Model model) {
         model.addAttribute("valoraciones", valoracionService.findAll());
         return "review/valoracionListView";
     }
 
-    // Listar valoraciones de un libro (público)
+    // ---------------------------------------------------
+    // 2) Listar valoraciones de un libro (público)
+    // ---------------------------------------------------
     @GetMapping("/libro/{id}")
-    public String listarValoracionesPorLibro(@PathVariable Long id, Model model) {
+    public String listarPorLibro(@PathVariable Long id, Model model) {
         Libro libro = libroService.obtenerPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Libro no encontrado"));
-        List<Valoracion> valoraciones = valoracionService.findByLibro(libro);
+        List<Valoracion> list = valoracionService.findByLibro(libro);
         model.addAttribute("libro", libro);
-        model.addAttribute("valoraciones", valoraciones);
+        model.addAttribute("valoraciones", list);
         return "review/valoracionListView";
     }
 
-    // Mostrar formulario para nueva valoración de un libro (usuario logueado)
+    // ---------------------------------------------------
+    // 3) Mostrar formulario de nueva valoración
+    // ---------------------------------------------------
     @GetMapping("/nueva")
-    public String mostrarFormularioNueva(@RequestParam(required = false) Long libroId, Model model) {
-        Valoracion valoracion = new Valoracion();
+    public String mostrarFormularioNueva(
+            @RequestParam(value = "libroId", required = false) Long libroId,
+            Model model) {
+
+        Valoracion dto = new Valoracion();
         if (libroId != null) {
             Libro libro = libroService.obtenerPorId(libroId)
                     .orElseThrow(() -> new IllegalArgumentException("Libro no encontrado"));
-            valoracion.setLibro(libro);
+            dto.setLibro(libro);
         }
-        model.addAttribute("valoracion", valoracion);
+        model.addAttribute("valoracion", dto);
         model.addAttribute("libros", libroService.obtenerTodos());
         return "review/formNewValoracionView";
     }
 
-    // Guardar valoración asociada al usuario logueado
-    @PostMapping("/guardar")
-    public String guardarValoracion(@ModelAttribute Valoracion valoracion) {
-        // Obtener usuario logueado
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        final String username;
-        if (auth != null && auth.getPrincipal() instanceof UserDetails) {
-            username = ((UserDetails) auth.getPrincipal()).getUsername();
-        } else {
-            throw new IllegalStateException("No hay usuario autenticado");
+    // ---------------------------------------------------
+    // 4) Procesar formulario de nueva valoración
+    // ---------------------------------------------------
+    @PostMapping("/save")
+    public String guardarValoracion(
+            @Valid @ModelAttribute("valoracion") Valoracion valoracion,
+            BindingResult br,
+            Principal principal,
+            Model model) {
+
+        if (br.hasErrors()) {
+            model.addAttribute("libros", libroService.obtenerTodos());
+            return "review/formNewValoracionView";
         }
 
-        Usuario usuario = usuarioService.findByNombre(username)
-                .orElseThrow(() -> new IllegalStateException("Usuario no encontrado: " + username));
+        // 1) Asociar usuario
+        Usuario user = usuarioService
+            .findByNombre(principal.getName())
+            .orElseThrow(() -> new UsernameNotFoundException("El usuario no ha sido encontrado"));
+        valoracion.setUsuario(user);
 
-        valoracion.setUsuario(usuario);
+        // 2) Guardar la valoración
+        Valoracion guardada = valoracionService.crearValoracion(valoracion);
 
-        // Guardar valoración
-        Valoracion vGuardada = valoracionService.crearValoracion(valoracion);
-
-        // Actualizar datos del libro (puntuación media)
-        Libro libro = libroService.obtenerPorId(vGuardada.getLibro().getId())
+        // 3) Recuperar el libro *completo* de la BD
+        Long libroId = guardada.getLibro().getId();
+        Libro libro = libroService.obtenerPorId(libroId)
                 .orElseThrow(() -> new IllegalStateException("Libro no encontrado"));
 
-        int total = libro.getTotalValoraciones() + 1;
-        Double suma = libro.getSumaValoraciones() + vGuardada.getPuntuacion();
-        libro.setTotalValoraciones(total);
-        libro.setSumaValoraciones(suma);
-        libro.setPuntuacionMedia(suma / total);
+        // 4) Recalcular medias con null-check
+        int prevTotal = Optional.ofNullable(libro.getTotalValoraciones()).orElse(0);
+        double prevSum = Optional.ofNullable(libro.getSumaValoraciones()).orElse(0.0);
+        libro.setTotalValoraciones(prevTotal + 1);
+        libro.setSumaValoraciones(prevSum + guardada.getPuntuacion());
+        libro.setPuntuacionMedia((prevSum + guardada.getPuntuacion()) / (prevTotal + 1));
 
+        // 5) Salvar el libro ya íntegro
         libroService.actualizarLibro(libro);
 
-        return "redirect:/valoraciones/libro/" + libro.getId();
+        return "redirect:/valoraciones/libro/" + libroId;
     }
 
-    // Mostrar formulario de edición solo para ADMIN o MANAGER (seguridad en backend)
+
+    // ---------------------------------------------------
+    // 5) Mostrar formulario de edición (ADMIN/MANAGER)
+    // ---------------------------------------------------
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
-        Valoracion valoracion = valoracionService.findById(id)
+        Valoracion v = valoracionService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Valoración no encontrada"));
-        model.addAttribute("valoracion", valoracion);
+        model.addAttribute("valoracion", v);
         model.addAttribute("libros", libroService.obtenerTodos());
         return "review/formEditValoracionView";
     }
 
-    // Actualizar valoración (sin cambiar usuario)
+    // ---------------------------------------------------
+    // 6) Procesar edición de valoración
+    // ---------------------------------------------------
     @PostMapping("/actualizar")
-    public String actualizarValoracion(@ModelAttribute Valoracion valoracion) {
-        Valoracion original = valoracionService.findById(valoracion.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Valoración no encontrada"));
+    public String actualizarValoracion(
+            @Valid @ModelAttribute("valoracion") Valoracion form,
+            BindingResult br,
+            Principal principal,
+            Model model) {
 
-        original.setComentario(valoracion.getComentario());
-        original.setPuntuacion(valoracion.getPuntuacion());
-        // No cambiamos usuario ni libro
-
-        Valoracion actualizada = valoracionService.actualizarValoracion(original);
-
-        return "redirect:/valoraciones/libro/" + actualizada.getLibro().getId();
-    }
-
-    // Eliminar valoración solo si eres creador o ADMIN
-    @GetMapping("/eliminar/{id}")
-    public String eliminarValoracion(@PathVariable Long id) {
-        Valoracion valoracion = valoracionService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Valoración no encontrada"));
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        final String username;
-        if (auth != null && auth.getPrincipal() instanceof UserDetails) {
-            username = ((UserDetails) auth.getPrincipal()).getUsername();
-        } else {
-            throw new IllegalStateException("No hay usuario autenticado");
+        if (br.hasErrors()) {
+            model.addAttribute("libros", libroService.obtenerTodos());
+            return "review/formEditValoracionView";
         }
 
-        Usuario usuario = usuarioService.findByNombre(username)
-                .orElseThrow(() -> new IllegalStateException("Usuario no encontrado: " + username));
+        Valoracion original = valoracionService.findById(form.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Valoración no encontrada"));
 
-        // Solo puede eliminar si es ADMIN o creador
-        if (usuario.getRol() == Role.ADMIN || usuario.equals(valoracion.getUsuario())) {
+        // Opcional: comprobar que principal es creador o ADMIN
+        Usuario user = usuarioService.findByNombre(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + principal.getName()));
+        boolean esAdmin = user.getRol().name().equals("ADMIN");
+        if (!esAdmin && !original.getUsuario().equals(user)) {
+            return "redirect:/accessError";
+        }
+
+        original.setComentario(form.getComentario());
+        original.setPuntuacion(form.getPuntuacion());
+        // no tocamos usuario ni libro
+
+        valoracionService.actualizarValoracion(original);
+        return "redirect:/valoraciones/libro/" + original.getLibro().getId();
+    }
+
+    // ---------------------------------------------------
+    // 7) Eliminar valoración (creador o ADMIN)
+    // ---------------------------------------------------
+    @GetMapping("/eliminar/{id}")
+    public String eliminarValoracion(@PathVariable Long id, Principal principal) {
+        Valoracion v = valoracionService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Valoración no encontrada"));
+
+        Usuario user = usuarioService.findByNombre(principal.getName())
+        .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + principal.getName()));
+        boolean esAdmin = user.getRol().name().equals("ADMIN");
+
+        if (esAdmin || v.getUsuario().equals(user)) {
             valoracionService.deleteById(id);
-            return "redirect:/valoraciones/libro/" + valoracion.getLibro().getId();
+            return "redirect:/valoraciones/libro/" + v.getLibro().getId();
         } else {
-            // Acceso denegado
             return "redirect:/accessError";
         }
     }

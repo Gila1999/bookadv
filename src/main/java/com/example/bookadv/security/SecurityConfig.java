@@ -47,7 +47,7 @@ public class SecurityConfig {
         .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests(auth -> auth
             // públicos
-            .requestMatchers("/", "/public/**", "/libros", "/generos", "/login**", "/signup**", "/logout-success").permitAll()
+            .requestMatchers("/", "/public/**", "/libros", "/libros/{id:\\d+}", "/generos", "/login**", "/signup/**", "/logout-success").permitAll()
             .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
             .requestMatchers("/h2-console/**").permitAll()
 

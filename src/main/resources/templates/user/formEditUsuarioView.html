@@ -51,15 +51,13 @@
           <option value="">-- Selecciona un rol --</option>
           <option th:each="r : ${T(com.example.bookadv.domain.Role).values()}"
                   th:value="${r}"
-                  th:text="${r}"
-                  th:selected="${r == usuario.rol}">
+                  th:text="${r}">
           </option>
         </select>
         <div class="text-danger"
-             th:if="${#fields.hasErrors('rol')}"
-             th:errors="*{rol}"></div>
+            th:if="${#fields.hasErrors('rol')}"
+            th:errors="*{rol}"></div>
       </div>
-
       <div class="text-center">
         <button type="submit" class="btn btn-primary">Actualizar</button>
         <a th:href="@{/usuarios}" class="btn btn-secondary">Cancelar</a>

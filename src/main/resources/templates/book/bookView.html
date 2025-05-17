@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+    <div class="container mt-4">
+      <h1 th:text="${libro.titulo}">Título del libro</h1>
+
+      <div class="mb-4">
+        <img th:if="${libro.portada != null}"
+             th:src="@{${libro.portada}}"
+             alt="Portada"
+             class="img-thumbnail"
+             style="width:200px; height:auto;">
+        <img th:if="${libro.portada == null}"
+             th:src="@{/img/default-cover.jpg}"
+             alt="Portada por defecto"
+             class="img-thumbnail"
+             style="width:200px; height:auto;">
+      </div>
+
+      <dl class="row">
+        <dt class="col-sm-3">Año:</dt>
+        <dd class="col-sm-9" th:text="${libro.anio}">2025</dd>
+
+        <dt class="col-sm-3">Género:</dt>
+        <dd class="col-sm-9" th:text="${libro.genero.nombre}">Fantasía</dd>
+
+        <dt class="col-sm-3">Autor:</dt>
+        <dd class="col-sm-9" th:text="${libro.autor}">Autor</dd>
+
+        <dt class="col-sm-3">Idioma:</dt>
+        <dd class="col-sm-9" th:text="${libro.idioma}">ESPAÑOL</dd>
+
+        <dt class="col-sm-3">Sinopsis:</dt>
+        <dd class="col-sm-9">
+          <p th:text="${libro.sinopsis}">Texto completo de la sinopsis…</p>
+        </dd>
+
+        <dt class="col-sm-3">Fecha de alta:</dt>
+        <dd class="col-sm-9"
+            th:text="${#temporals.format(libro.fechaAlta, 'dd/MM/yyyy')}">
+            01/01/2025
+        </dd>
+
+        <!-- Nuevos campos de valoraciones -->
+        <dt class="col-sm-3">Total de valoraciones:</dt>
+        <dd class="col-sm-9" th:text="${libro.totalValoraciones}">0</dd>
+
+        <dt class="col-sm-3">Suma de puntuaciones:</dt>
+        <dd class="col-sm-9" th:text="${libro.sumaValoraciones}">0</dd>
+
+        <dt class="col-sm-3">Puntuación media:</dt>
+        <dd class="col-sm-9"
+            th:text="${#numbers.formatDecimal(libro.puntuacionMedia, 1, 1)}">
+            0.0
+        </dd>
+      </dl>
+
+      <a th:href="@{/libros}" class="btn btn-secondary">Volver a la lista</a>
+    </div>
+
+    <th:block th:replace="fragments/footer :: footer"></th:block>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container mt-4">
+        <h1>Editar Género</h1>
+        <form th:action="@{/generos/editar}" method="post" th:object="${genero}">
+            <input type="hidden" th:field="*{id}">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del género</label>
+                <input type="text" id="nombre" class="form-control" th:field="*{nombre}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="/generos" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

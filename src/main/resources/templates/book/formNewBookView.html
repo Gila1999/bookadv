@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <!-- Navbar -->
+    <th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+    <div class="container mt-4">
+      <h1>Añadir Nuevo Libro</h1>
+      <!-- Asociamos el formulario al objeto "libro" -->
+      <form th:action="@{/libros/nuevo}" th:object="${libro}" method="post">
+        <div class="mb-3">
+          <label for="titulo" class="form-label">Título</label>
+          <input th:field="*{titulo}" type="text" class="form-control" id="titulo" required/>
+        </div>
+        <div class="mb-3">
+          <label for="autor" class="form-label">Autor</label>
+          <input th:field="*{autor}" type="text" class="form-control" id="autor" required/>
+        </div>
+        <div class="mb-3">
+          <label for="anio" class="form-label">Año</label>
+          <input th:field="*{anio}" type="number" class="form-control" id="anio" required/>
+        </div>
+        <div class="mb-3">
+          <label for="genero" class="form-label">Género</label>
+          <!-- Iteramos sobre la lista de entidades Genero -->
+          <select th:field="*{genero.id}" class="form-select" id="genero" required>
+            <option value="" disabled>Seleccione un género</option>
+            <option th:each="g : ${generos}"
+                    th:value="${g.id}"
+                    th:text="${g.nombre}">
+            </option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="idioma" class="form-label">Idioma</label>
+          <!-- Aquí sí usamos el enum Idioma -->
+          <select th:field="*{idioma}" class="form-select" id="idioma" required>
+            <option value="" disabled>Seleccione un idioma</option>
+            <option th:each="i : ${idiomas}"
+                    th:value="${i}" th:text="${i}">
+            </option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="sinopsis" class="form-label">Sinopsis</label>
+          <textarea th:field="*{sinopsis}" class="form-control" id="sinopsis" rows="4" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="portada" class="form-label">URL de la Portada</label>
+          <input th:field="*{portada}" type="text" class="form-control" id="portada"/>
+        </div>
+        <button type="submit" class="btn btn-success">Añadir Libro</button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <th:block th:replace="fragments/footer :: footer"></th:block>
+  </body>
+</html>

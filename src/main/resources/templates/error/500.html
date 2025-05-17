@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<body>
+  <div th:replace="fragments/navbar :: navbar"></div>
+  <div class="container mt-5 text-center">
+    <h1>500 – Error interno</h1>
+    <p>Ha ocurrido un error en el servidor. Inténtalo de nuevo más tarde.</p>
+    <a th:href="@{/public/}">Volver al inicio</a>
+  </div>
+</body>
+</html>

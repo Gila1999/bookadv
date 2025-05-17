@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container">
+        <h1 class="text-center my-4">Formulario de Contacto</h1>
+        <form th:action="@{/enviarContacto}" method="post" th:object="${formInfo}">
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required/>
+            </div>
+            <div class="form-group">
+                <label for="email">Correo electrónico:</label>
+                <input type="email" id="email" th:field="*{email}" class="form-control" required/>
+            </div>
+            <div class="form-group">
+                <label for="motivo">Motivo del contacto:</label>
+                <textarea id="motivo" th:field="*{motivo}" class="form-control" required></textarea>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="aceptar" th:field="*{aceptar}" required/>
+                <label class="form-check-label" for="aceptar">Acepto las condiciones de servicio</label>
+            </div>
+            <div>
+                <p th:if="${error}" class="alert alert-danger" th:text="${error}"></p>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Enviar</button>
+        </form>
+        
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

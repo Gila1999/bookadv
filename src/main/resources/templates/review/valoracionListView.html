@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <div class="container my-4">
+    <h1 class="text-center" 
+        th:text="${libro != null} ? 'Valoraciones de: ' + ${libro.titulo} : 'Lista de Valoraciones'">
+      Lista de Valoraciones
+    </h1>
+
+    <div class="text-end mb-3">
+      <a class="btn btn-success"
+         th:if="${libro != null}"
+         th:href="@{/valoraciones/nueva(libroId=${libro.id})}">
+        + Nueva Valoración
+      </a>
+      <a class="btn btn-success"
+         th:if="${libro == null}"
+         th:href="@{/valoraciones/nueva}">
+        + Nueva Valoración
+      </a>
+    </div>
+
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th th:if="${libro == null}">Libro</th>
+          <th>Usuario</th>
+          <th>Puntuación</th>
+          <th>Comentario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="valoracion : ${valoraciones}">
+          <td th:text="${valoracion.id}"></td>
+          <td th:if="${libro == null}" th:text="${valoracion.libro.titulo}"></td>
+          <td th:text="${valoracion.usuario.nombre}"></td>
+          <td th:text="${valoracion.puntuacion}"></td>
+          <td th:text="${valoracion.comentario}"></td>
+          <td>
+            <a th:href="@{/valoraciones/editar/{id}(id=${valoracion.id})}" class="btn btn-warning btn-sm">Editar</a>
+            <a th:href="@{/valoraciones/eliminar/{id}(id=${valoracion.id})}" class="btn btn-danger btn-sm"
+               onclick="return confirm('¿Estás seguro de que quieres eliminar esta valoración?');">Eliminar</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <a th:href="@{/libros}" class="btn btn-secondary mt-3">Volver a libros</a>
+  </div>
+
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

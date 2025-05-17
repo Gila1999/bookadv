@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container my-4">
+    <h1 class="text-center">Editar Valoración</h1>
+
+    <form th:action="@{/valoraciones/actualizar}" method="post">
+        <!-- ID oculta de la valoración -->
+        <input type="hidden" name="id" th:value="${valoracion.id}" />
+
+        <div class="mb-3">
+            <label for="libroId" class="form-label">Libro</label>
+            <select id="libroId" name="libroId" class="form-select" required>
+                <option th:each="libro : ${libros}"
+                        th:value="${libro.id}"
+                        th:text="${libro.titulo}"
+                        th:selected="${libro.id == valoracion.libro.id}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="usuarioId" class="form-label">Usuario</label>
+            <select id="usuarioId" name="usuarioId" class="form-select" required>
+                <option th:each="usuario : ${usuarios}"
+                        th:value="${usuario.id}"
+                        th:text="${usuario.nombre}"
+                        th:selected="${usuario.id == valoracion.usuario.id}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="puntuacion" class="form-label">Puntuación</label>
+            <input type="number" name="puntuacion" th:value="${valoracion.puntuacion}" min="1" max="5" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="comentario" class="form-label">Comentario</label>
+            <textarea name="comentario" class="form-control" rows="4"
+                      th:text="${valoracion.comentario}"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+    </form>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

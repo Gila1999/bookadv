@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <div class="container my-4">
+    <h1 class="text-center">Nueva Valoración</h1>
+
+    <!-- Mensaje de error si viene del ControllerAdvice -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/valoraciones/guardar}"
+          th:object="${valoracion}"
+          method="post">
+
+      <!-- DESPLEGABLE DE LIBROS -->
+      <div class="mb-3">
+        <label for="libro" class="form-label">Libro</label>
+        <select id="libro"
+                th:field="*{libro.id}"
+                class="form-select"
+                required>
+          <option value="" disabled>Seleccione un libro</option>
+          <option th:each="l : ${libros}"
+                  th:value="${l.id}"
+                  th:text="${l.titulo}">
+          </option>
+        </select>
+      </div>
+
+      <!-- PUNTUACIÓN -->
+      <div class="mb-3">
+        <label for="puntuacion" class="form-label">Puntuación</label>
+        <input type="number"
+               id="puntuacion"
+               th:field="*{puntuacion}"
+               min="1" max="5"
+               class="form-control"
+               required />
+      </div>
+
+      <!-- COMENTARIO -->
+      <div class="mb-3">
+        <label for="comentario" class="form-label">Comentario</label>
+        <textarea id="comentario"
+                  th:field="*{comentario}"
+                  class="form-control"
+                  rows="4"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+  </div>
+
+  <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

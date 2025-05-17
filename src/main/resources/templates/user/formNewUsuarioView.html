@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<body>
+  <div th:replace="fragments/navbar :: navbar"></div>
+
+  <div class="container my-4">
+    <h1 class="text-center">Nuevo Usuario</h1>
+    <form th:action="@{/usuarios/guardar}"
+          th:object="${usuario}"
+          method="post"
+          class="mx-auto"
+          style="max-width: 500px;">
+
+      <!-- Nombre de usuario -->
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre de usuario</label>
+        <input type="text"
+               id="nombre"
+               th:field="*{nombre}"
+               class="form-control"
+               placeholder="Introduce el nombre"
+               required />
+        <div class="text-danger"
+             th:if="${#fields.hasErrors('nombre')}"
+             th:errors="*{nombre}"></div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password"
+               id="password"
+               th:field="*{password}"
+               class="form-control"
+               placeholder="Introduce la contraseña"
+               required />
+        <div class="text-danger"
+             th:if="${#fields.hasErrors('password')}"
+             th:errors="*{password}"></div>
+      </div>
+
+      <!-- Rol -->
+      <div class="mb-3">
+        <label for="rol" class="form-label">Rol</label>
+        <select id="rol"
+                th:field="*{rol}"
+                class="form-select"
+                required>
+          <option value="">-- Selecciona un rol --</option>
+          <option th:each="r : ${T(com.example.bookadv.domain.Role).values()}"
+                  th:value="${r}"
+                  th:text="${r}">
+          </option>
+        </select>
+        <div class="text-danger"
+             th:if="${#fields.hasErrors('rol')}"
+             th:errors="*{rol}"></div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a th:href="@{/usuarios}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+  <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

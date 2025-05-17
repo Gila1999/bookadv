@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+
+    <th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+    <div class="container mt-4">
+      <h1>Lista de Libros</h1>
+
+      <!-- Filtro de búsqueda -->
+      <form th:action="@{/libros}" method="get">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <input type="text"
+                   class="form-control"
+                   name="buscar"
+                   th:value="${param.buscar}"
+                   placeholder="Buscar por título">
+          </div>
+          <div class="col-md-4">
+            <select class="form-select"
+                    name="genero">
+              <option value=""
+                      th:selected="${filtroGeneroId == null}">
+                Seleccionar género
+              </option>
+              <option th:each="gen : ${generos}"
+                      th:value="${gen.id}"
+                      th:text="${gen.nombre}"
+                      th:selected="${gen.id == filtroGeneroId}">
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a th:href="@{/libros}" class="btn btn-secondary">Reestablecer</a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Tabla de libros -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Portada</th>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Sinopsis</th>
+            <th>Idioma</th>
+            <th>Editar</th>
+            <th>Borrar</th>
+            <th>Valoraciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="libro : ${libros}">
+            <td th:text="${libro.id}"></td>
+            <td>
+              <img th:if="${libro.portada != null}"
+                   th:src="@{${libro.portada}}"
+                   class="img-thumbnail" style="width:80px">
+              <img th:if="${libro.portada == null}"
+                   th:src="@{/img/default-cover.jpg}"
+                   class="img-thumbnail" style="width:80px">
+            </td>
+            <td>
+              <a th:href="@{/libros/{id}(id=${libro.id})}"
+                 th:text="${libro.titulo}"></a>
+            </td>
+            <td th:text="${libro.autor}"></td>
+            <td th:text="${#strings.length(libro.sinopsis) > 100 
+                           ? libro.sinopsis.substring(0,100) + '...' 
+                           : libro.sinopsis}"></td>
+            <td th:text="${libro.idioma}"></td>
+            <td><a th:href="@{/libros/editar/{id}(id=${libro.id})}"
+                   class="btn btn-warning">Editar</a></td>
+            <td><a th:href="@{/libros/eliminar/{id}(id=${libro.id})}"
+                   class="btn btn-danger">Eliminar</a></td>
+            <td><a th:href="@{/valoraciones/libro/{id}(id=${libro.id})}"
+                   class="btn btn-info">Valoraciones</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a th:href="@{/libros/nuevo}" class="btn btn-success">Añadir nuevo libro</a>
+    </div>
+
+    <th:block th:replace="fragments/footer :: footer"></th:block>
+  </body>
+</html>

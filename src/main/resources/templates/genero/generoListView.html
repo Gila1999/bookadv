@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container mt-4">
+        <h1>Lista de Géneros</h1>
+
+        <a href="/generos/nuevo" class="btn btn-success mb-3">Añadir nuevo género</a>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="genero : ${generos}">
+                    <td th:text="${genero.id}"></td>
+                    <td th:text="${genero.nombre}"></td>
+                    <td>
+                        <a th:href="@{/generos/editar/{id}(id=${genero.id})}" class="btn btn-warning btn-sm">Editar</a>
+                        <a th:href="@{/generos/eliminar/{id}(id=${genero.id})}" class="btn btn-danger btn-sm"
+                           onclick="return confirm('¿Estás seguro de eliminar este género?');">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

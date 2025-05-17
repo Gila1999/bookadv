@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <!-- navbar -->
+    <th:block th:replace="fragments/navbar :: navbar"></th:block>
+
+    <div class="container mt-4">
+      <h1>Editar Libro</h1>
+      <!-- Le decimos a Thymeleaf que el form ”trabaja sobre” el objeto ${libro} -->
+      <form th:action="@{/libros/editar}" th:object="${libro}" method="post">
+        <!-- Campo oculto para el ID -->
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="mb-3">
+          <label for="titulo" class="form-label">Título</label>
+          <!-- th:field conecta automáticamente al property titulo -->
+          <input type="text" class="form-control" id="titulo" th:field="*{titulo}" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="autor" class="form-label">Autor</label>
+          <input type="text" class="form-control" id="autor" th:field="*{autor}" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="anio" class="form-label">Año</label>
+          <input type="number" class="form-control" id="anio" th:field="*{anio}" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="genero" class="form-label">Género</label>
+          <select class="form-select" id="genero" th:field="*{genero}" required>
+            <option th:each="g : ${generos}"
+                    th:value="${g.id}"
+                    th:text="${g.nombre}">
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="idioma" class="form-label">Idioma</label>
+          <select class="form-select" id="idioma" th:field="*{idioma}" required>
+            <option th:each="i : ${idiomas}"
+                    th:value="${i}"
+                    th:text="${i}"></option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="sinopsis" class="form-label">Sinopsis</label>
+          <textarea class="form-control" id="sinopsis" th:field="*{sinopsis}" rows="4" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="portada" class="form-label">URL de la portada</label>
+          <input type="text" class="form-control" id="portada" th:field="*{portada}" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar cambios</button>
+      </form>
+    </div>
+
+    <!-- footer -->
+    <th:block th:replace="fragments/footer :: footer"></th:block>
+  </body>
+</html>

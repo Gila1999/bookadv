@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
-<body>
-  <div th:replace="~{fragments/navbar :: navbar}"></div>
-  <div class="container text-center mt-5">
-    <h2>Sesión cerrada</h2>
-    <p>Has cerrado sesión correctamente.</p>
-    <a th:href="@{/public/}" class="btn btn-primary">Volver al inicio</a>
-  </div>
-  <div th:replace="~{fragments/footer :: footer}"></div>
-</body>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <main class="container my-4 text-center">
+      <h2>Has cerrado sesión correctamente</h2>
+      <a class="btn btn-primary mt-3" th:href="@{/public/inicio}">Volver al inicio</a>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
 </html>

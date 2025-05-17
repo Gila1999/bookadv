@@ -3,6 +3,7 @@ package com.example.bookadv.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -66,23 +67,26 @@ public class UsuarioService {
     /**
      * Cambia la contraseña de un usuario validando la actual y que new == confirm.
      */
-    public void ChangePassword(Long userId,ChangePasswordDto dto) throws Exception {
-        Usuario u = usuarioRepository.findById(userId)
-                    .orElseThrow(() -> new Exception("Usuario no encontrado."));
-    
-
-        //1.- Verificamos que la actual coincide
+    public void changePassword(String username, ChangePasswordDto dto) {
+        Usuario u = usuarioRepository.findByNombre(username)
+            .orElseThrow();
         if (!passwordEncoder.matches(dto.getCurrentPassword(), u.getPassword())) {
-            throw new Exception("La contraseña actual no coincide.");
+            throw new IllegalArgumentException("La contraseña actual no coincide");
         }
-
-        // 2.- Verificamos la confirmación.
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
-            throw new Exception("La nueva contraseña y su confirmación no coinciden");
+            throw new IllegalArgumentException("Las nuevas contraseñas no coinciden");
         }
-
-        // 3.- Encriptamos y guardamos
         u.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        usuarioRepository.save(u);
+    }
+
+
+    public void updateProfile (String currentUsername, Usuario form) {
+        Usuario u = findByNombre(currentUsername)
+        .orElseThrow(() -> new UsernameNotFoundException(
+            "Usuario no encontrado con nombre: " + currentUsername
+        ));
+        u.setNombre(form.getNombre());
         usuarioRepository.save(u);
     }
 }

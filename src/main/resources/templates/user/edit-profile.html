@@ -1,0 +1,22 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head th:replace="fragments/head :: head"></head>
+  <body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    <main class="container my-4">
+      <h1>Editar Perfil</h1>
+      <form th:action="@{/usuarios/editar-perfil}" th:object="${usuario}" method="post">
+        <div class="mb-3">
+          <label class="form-label">Nombre de usuario:</label>
+          <input class="form-control" type="text" th:field="*{nombre}" />
+          <div class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Rol:</label>
+          <input class="form-control" type="text" th:value="${usuario.rol}" readonly />
+        </div>
+        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+      </form>
+    </main>
+    <div th:replace="fragments/footer :: footer"></div>
+  </body>
+</html>
